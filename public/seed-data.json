@@ -1,0 +1,45 @@
+{
+  "teams": [
+    { "id": "A", "name": "Team A" },
+    { "id": "B", "name": "Team B" },
+    { "id": "C", "name": "Team C" },
+    { "id": "D", "name": "Team D" },
+    { "id": "E", "name": "Team E" },
+    { "id": "F", "name": "Team F" },
+    { "id": "G", "name": "Team G" },
+    { "id": "H", "name": "Team H" }
+  ],
+  "pairs": [
+    { "id": "A1", "team": "A", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
+    { "id": "A2", "team": "A", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
+    { "id": "A3", "team": "A", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false },
+
+    { "id": "B1", "team": "B", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
+    { "id": "B2", "team": "B", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
+    { "id": "B3", "team": "B", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false },
+
+    { "id": "C1", "team": "C", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
+    { "id": "C2", "team": "C", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
+    { "id": "C3", "team": "C", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false },
+
+    { "id": "D1", "team": "D", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
+    { "id": "D2", "team": "D", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
+    { "id": "D3", "team": "D", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false },
+
+    { "id": "E1", "team": "E", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
+    { "id": "E2", "team": "E", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
+    { "id": "E3", "team": "E", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false },
+
+    { "id": "F1", "team": "A", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
+    { "id": "F2", "team": "F", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
+    { "id": "F3", "team": "F", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false },
+
+    { "id": "G1", "team": "G", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
+    { "id": "G2", "team": "G", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
+    { "id": "G3", "team": "G", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false },
+
+    { "id": "H1", "team": "H", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
+    { "id": "H2", "team": "H", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
+    { "id": "H3", "team": "H", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false }
+  ]
+}
