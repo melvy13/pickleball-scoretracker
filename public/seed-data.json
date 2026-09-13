@@ -30,7 +30,7 @@
     { "id": "E2", "team": "E", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
     { "id": "E3", "team": "E", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false },
 
-    { "id": "F1", "team": "A", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
+    { "id": "F1", "team": "F", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
     { "id": "F2", "team": "F", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
     { "id": "F3", "team": "F", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false },
 
