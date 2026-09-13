@@ -1,0 +1,32 @@
+<div class="container mt-4">
+  <h2>Standings</h2>
+
+  <table class="table table-striped table-bordered align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Rank</th>
+        <th>Team</th>
+        <th>Played</th>
+        <th>Points</th>
+        <th>Match W-L</th>
+        <th>Match Diff</th>
+        <th>Game Pt W-L</th>
+        <th>Game Pt Diff</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (s of standings(); track s.teamId) {
+        <tr>
+          <td>{{ s.rank }}</td>
+          <td>{{ getTeamName(s.teamId) }}</td>
+          <td>{{ s.fixturesPlayed }}</td>
+          <td>{{ s.points }}</td>
+          <td>{{ s.matchWins }}-{{ s.matchLosses }}</td>
+          <td>{{ s.matchDifferential }}</td>
+          <td>{{ s.gamePointsFor }}-{{ s.gamePointsAgainst }}</td>
+          <td>{{ s.gamePointDifferential }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

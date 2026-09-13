@@ -1,0 +1,64 @@
+<div class="container mt-4">
+  <h2>Score Entry</h2>
+
+  @for (fixture of tournamentService.fixtures(); track fixture.id) {
+    <div class="card mb-3">
+      <div class="card-header">
+        {{ getTeamName(fixture.teamAId) }} vs {{ getTeamName(fixture.teamBId) }}
+      </div>
+      <div class="card-body">
+        @for (matchId of fixture.matchIds; track matchId) {
+          @if (tournamentService.matches().find(m => m.id === matchId); as match) {
+            <div class="row align-items-center mb-2 border-bottom pb-2">
+              <div class="col-3">
+                Seed {{ match.seed }}: {{ getPairLabel(match.pairAId) }}
+                @if (match.isHandicapMatch) {
+                  <span class="badge bg-warning text-dark">Handicap</span>
+                }
+              </div>
+              <div class="col-2">
+                <input
+                  type="number"
+                  class="form-control"
+                  [disabled]="match.locked"
+                  [ngModel]="draftFor(match.id).scoreA"
+                  (ngModelChange)="updateDraft(match.id, 'scoreA', $event)"
+                />
+              </div>
+              <div class="col-1 text-center">vs</div>
+              <div class="col-2">
+                <input
+                  type="number"
+                  class="form-control"
+                  [disabled]="match.locked"
+                  [ngModel]="draftFor(match.id).scoreB"
+                  (ngModelChange)="updateDraft(match.id, 'scoreB', $event)"
+                />
+              </div>
+              <div class="col-3">
+                {{ getPairLabel(match.pairBId) }}
+              </div>
+              <div class="col-1">
+                @if (match.locked) {
+                  <button class="btn btn-sm btn-outline-secondary" (click)="unlock(match.id)">
+                    Unlock
+                  </button>
+                } @else {
+                  <button class="btn btn-sm btn-primary" (click)="submitScore(match)">
+                    Save
+                  </button>
+                }
+              </div>
+
+              @if (draftFor(match.id).error) {
+                <div class="col-12 text-danger small mt-1">
+                  {{ draftFor(match.id).error }}
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
