@@ -1,0 +1,38 @@
+<div class="container mt-4">
+  <h2>Pairs</h2>
+  <p class="text-muted">
+    Check "Voided" if a pair drops out or is injured. All their matches — past and future — will be excluded from standings.
+  </p>
+
+  <table class="table table-striped table-bordered align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Pair</th>
+        <th>Team</th>
+        <th>Seed</th>
+        <th>Type</th>
+        <th>Players</th>
+        <th>Voided</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (pair of tournamentService.pairs(); track pair.id) {
+        <tr [class.table-danger]="pair.voided">
+          <td>{{ pair.id }}</td>
+          <td>{{ getTeamName(pair.team) }}</td>
+          <td>{{ pair.seed }}</td>
+          <td>{{ pair.type }}</td>
+          <td>{{ pair.players[0] }} / {{ pair.players[1] }}</td>
+          <td>
+            <input
+              type="checkbox"
+              class="form-check-input"
+              [ngModel]="pair.voided"
+              (ngModelChange)="onVoidChange(pair.id, $event)"
+            />
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,1 +1,12 @@
-<router-outlet />
+<nav class="navbar navbar-expand navbar-dark bg-dark mb-3">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/standings">Pickleball Tracker</a>
+    <div class="navbar-nav">
+      <a class="nav-link" routerLink="/standings" routerLinkActive="active">Standings</a>
+      <a class="nav-link" routerLink="/score-entry" routerLinkActive="active">Score Entry</a>
+      <a class="nav-link" routerLink="/pairs" routerLinkActive="active">Pairs</a>
+    </div>
+  </div>
+</nav>
+
+<router-outlet></router-outlet>
