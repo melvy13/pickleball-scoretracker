@@ -134,4 +134,9 @@ export class TournamentService {
 
     this.saveToStorage();
   }
+
+  resetTournament(): void {
+    localStorage.removeItem(STORAGE_KEY);
+    window.location.reload();
+  }
 }
