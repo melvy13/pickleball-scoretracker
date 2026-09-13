@@ -21,19 +21,22 @@ export class ScoreEntryComponent {
 
   drafts = signal<Record<string, ScoreDraft>>({});
 
-  draftFor(matchId: string): ScoreDraft {
-    return this.drafts()[matchId] ?? { scoreA: null, scoreB: null, error: null };
+  draftFor(match: Match): ScoreDraft {
+    const existing = this.drafts()[match.id];
+    if (existing) return existing;
+    return { scoreA: match.scoreA, scoreB: match.scoreB, error: null };
   }
 
   updateDraft(matchId: string, field: 'scoreA' | 'scoreB', value: number | null): void {
+    const match = this.tournamentService.matches().find(m => m.id === matchId)!;
     this.drafts.update(d => ({
       ...d,
-      [matchId]: { ...this.draftFor(matchId), [field]: value, error: null }
+      [matchId]: { ...this.draftFor(match), [field]: value, error: null }
     }));
   }
 
   submitScore(match: Match): void {
-    const draft = this.draftFor(match.id);
+    const draft = this.draftFor(match);
 
     if (draft.scoreA === null || draft.scoreB === null) {
       this.setDraftError(match.id, 'Both scores are required.');
@@ -53,9 +56,10 @@ export class ScoreEntryComponent {
   }
 
   private setDraftError(matchId: string, error: string | null): void {
+    const match = this.tournamentService.matches().find(m => m.id === matchId)!;
     this.drafts.update(d => ({
       ...d,
-      [matchId]: { ...this.draftFor(matchId), error }
+      [matchId]: { ...this.draftFor(match), error }
     }));
   }
 

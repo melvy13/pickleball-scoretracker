@@ -21,7 +21,7 @@
                   type="number"
                   class="form-control"
                   [disabled]="match.locked"
-                  [ngModel]="draftFor(match.id).scoreA"
+                  [ngModel]="draftFor(match).scoreA"
                   (ngModelChange)="updateDraft(match.id, 'scoreA', $event)"
                 />
               </div>
@@ -31,7 +31,7 @@
                   type="number"
                   class="form-control"
                   [disabled]="match.locked"
-                  [ngModel]="draftFor(match.id).scoreB"
+                  [ngModel]="draftFor(match).scoreB"
                   (ngModelChange)="updateDraft(match.id, 'scoreB', $event)"
                 />
               </div>
@@ -50,9 +50,9 @@
                 }
               </div>
 
-              @if (draftFor(match.id).error) {
+              @if (draftFor(match).error) {
                 <div class="col-12 text-danger small mt-1">
-                  {{ draftFor(match.id).error }}
+                  {{ draftFor(match).error }}
                 </div>
               }
             </div>
