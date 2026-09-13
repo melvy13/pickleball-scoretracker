@@ -117,4 +117,21 @@ export class TournamentService {
 
     this.saveToStorage();
   }
+
+  setPairVoided(pairId: string, voided: boolean): void {
+    const pair = this.pairs().find(p => p.id === pairId);
+    if (!pair) {
+      throw new Error(`Pair not found: ${pairId}`);
+    }
+
+    this.pairs.update(pairs =>
+      pairs.map(pair =>
+        pair.id === pairId
+          ? { ...pair, voided }
+          : pair
+      )
+    );
+
+    this.saveToStorage();
+  }
 }

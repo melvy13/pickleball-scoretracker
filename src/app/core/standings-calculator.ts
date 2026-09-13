@@ -1,0 +1,172 @@
+import { FixtureOutcome, FixtureResult } from "../models/results.model";
+import { Fixture } from "../models/fixture.model";
+import { Match } from "../models/match.model";
+import { Pair, SeedLevel } from "../models/pair.model";
+import { Team } from "../models/team.model";
+import { RankedStanding, TeamStanding } from "../models/standings.model";
+
+export function getExcludedSeedsForTeam(teamId: string, allPairs: Pair[]): Set<SeedLevel> {
+  const teamPairs = allPairs.filter(p => p.team === teamId);
+  const voidedPairs = teamPairs.filter(p => p.voided);
+  if (voidedPairs.length === 0) {
+    return new Set();
+  }
+
+  if (voidedPairs.length === 1) {
+    return new Set([voidedPairs[0].seed]);
+  }
+
+  // 2 or 3 pairs voided: whole team excluded, all 3 seeds drop
+  return new Set([1, 2, 3]);
+}
+
+export function isMatchVoided(match: Match, teamAId: string, teamBId: string, allPairs: Pair[]): boolean {
+  const excludedForA = getExcludedSeedsForTeam(teamAId, allPairs);
+  const excludedForB = getExcludedSeedsForTeam(teamBId, allPairs);
+
+  return excludedForA.has(match.seed) || excludedForB.has(match.seed);
+}
+
+export function calculateFixtureResult(fixture: Fixture, allMatches: Match[], allPairs: Pair[]): FixtureResult {
+  const fixtureMatches = fixture.matchIds
+    .map(id => allMatches.find(m => m.id === id))
+    .filter((m): m is Match => m !== undefined);
+
+  let teamAWins = 0;
+  let teamBWins = 0;
+  let validMatchCount = 0;
+
+  for (const match of fixtureMatches) {
+    const voided = isMatchVoided(match, fixture.teamAId, fixture.teamBId, allPairs);
+    if (voided) continue;
+    if (!match.completed) continue;
+
+    validMatchCount++;
+
+    if (match.scoreA === match.scoreB) continue; // shouldn't happen but guard anyway
+
+    const teamAWonThisMatch = (match.scoreA ?? 0) > (match.scoreB ?? 0);
+    if (teamAWonThisMatch) {
+      teamAWins++;
+    } else {
+      teamBWins++;
+    }
+  }
+
+  let outcome: FixtureOutcome;
+  if (validMatchCount === 0) {
+    outcome = 'no-contest';
+  } else if (teamAWins > teamBWins) {
+    outcome = 'teamA';
+  } else if (teamBWins > teamAWins) {
+    outcome = 'teamB';
+  } else {
+    outcome = 'draw';
+  }
+
+  return {
+    fixtureId: fixture.id,
+    outcome,
+    teamAWins,
+    teamBWins,
+    validMatchCount
+  };
+}
+
+export function calculateStandings(teams: Team[], fixtures: Fixture[], allMatches: Match[], allPairs: Pair[]): TeamStanding[] {
+  const standingsMap = new Map<string, TeamStanding>();
+
+  for (const team of teams) {
+    standingsMap.set(team.id, {
+      teamId: team.id,
+      fixturesPlayed: 0,
+      points: 0,
+      matchWins: 0,
+      matchLosses: 0,
+      gamePointsFor: 0,
+      gamePointsAgainst: 0
+    });
+  }
+
+  for (const fixture of fixtures) {
+    const result = calculateFixtureResult(fixture, allMatches, allPairs);
+
+    if (result.outcome === 'no-contest') continue;
+
+    const teamA = standingsMap.get(fixture.teamAId)!;
+    const teamB = standingsMap.get(fixture.teamBId)!;
+    teamA.fixturesPlayed++;
+    teamB.fixturesPlayed++;
+    teamA.matchWins += result.teamAWins;
+    teamA.matchLosses += result.teamBWins;
+    teamB.matchWins += result.teamBWins;
+    teamB.matchLosses += result.teamAWins;
+
+    if (result.outcome === 'teamA') {
+      teamA.points += 2;
+    } else if (result.outcome === 'teamB') {
+      teamB.points += 2;
+    } else if (result.outcome === 'draw') {
+      teamA.points += 1;
+      teamB.points += 1;
+    }
+  }
+
+  for (const match of allMatches) {
+    if (!match.completed) continue;
+
+    const fixture = fixtures.find(f => f.matchIds.includes(match.id));
+    if (!fixture) continue;
+
+    const voided = isMatchVoided(match, fixture.teamAId, fixture.teamBId, allPairs);
+    if (voided) continue;
+
+    const teamA = standingsMap.get(fixture.teamAId)!;
+    const teamB = standingsMap.get(fixture.teamBId)!;
+
+    teamA.gamePointsFor += match.scoreA ?? 0;
+    teamA.gamePointsAgainst += match.scoreB ?? 0;
+    teamB.gamePointsFor += match.scoreB ?? 0;
+    teamB.gamePointsAgainst += match.scoreA ?? 0;
+  }
+
+  return Array.from(standingsMap.values());
+}
+
+export function rankStandings(standings: TeamStanding[]): RankedStanding[] {
+  const withDifferentials = standings.map(s => ({
+    ...s,
+    matchDifferential: s.matchWins - s.matchLosses,
+    gamePointDifferential: s.gamePointsFor - s.gamePointsAgainst
+  }));
+
+  const sorted = [...withDifferentials].sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.matchDifferential !== a.matchDifferential) return b.matchDifferential - a.matchDifferential;
+    return b.gamePointDifferential - a.gamePointDifferential;
+  });
+
+  const ranked: RankedStanding[] = [];
+  let currentRank = 1;
+
+  for (let i = 0; i < sorted.length; i++) {
+    const team = sorted[i];
+
+    if (i > 0) {
+      const prev = sorted[i - 1];
+      const isTiedWithPrev =
+        team.points === prev.points &&
+        team.matchDifferential === prev.matchDifferential &&
+        team.gamePointDifferential === prev.gamePointDifferential;
+
+      if (!isTiedWithPrev) {
+        currentRank = i + 1;
+      }
+      // if tied, currentRank stays the same as prev -> shared placement
+    }
+
+    ranked.push({ ...team, rank: currentRank });
+  }
+
+  return ranked;
+}
