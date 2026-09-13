@@ -51,7 +51,8 @@ export function generateTournament(teams: Team[], pairs: Pair[]): GeneratedTourn
           scoreA: null,
           scoreB: null,
           isHandicapMatch,
-          completed: false
+          completed: false,
+          locked: false
         });
 
         matchIds.push(matchId);

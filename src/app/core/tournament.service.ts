@@ -75,4 +75,46 @@ export class TournamentService {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
+
+  updateScore(matchId: string, scoreA: number, scoreB: number): void {
+    const match = this.matches().find(m => m.id === matchId);
+    if (!match) {
+      throw new Error(`Match not found: ${matchId}`);
+    }
+    if (match.locked) {
+      throw new Error(`Match ${matchId} is locked. Unlock it before editing.`);
+    }
+
+    const isValid =
+      (scoreA === 15 && scoreB >= 0 && scoreB <= 14) ||
+      (scoreB === 15 && scoreA >= 0 && scoreA <= 14);
+
+    if (!isValid) {
+      throw new Error(
+        `Invalid score: ${scoreA}-${scoreB}. Winner must have exactly 15, loser 0-14.`
+      );
+    }
+
+    this.matches.update(matches =>
+      matches.map(match =>
+        match.id === matchId
+          ? { ...match, scoreA, scoreB, completed: true, locked: true }
+          : match
+      )
+    );
+
+    this.saveToStorage();
+  }
+
+  unlockMatch(matchId: string): void {
+    this.matches.update(matches =>
+      matches.map(match =>
+        match.id === matchId
+          ? { ...match, locked: false }
+          : match
+      )
+    );
+
+    this.saveToStorage();
+  }
 }
