@@ -7,6 +7,7 @@
         <th>Rank</th>
         <th>Team</th>
         <th>Played</th>
+        <th>W-D-L</th>
         <th>Points</th>
         <th>Match W-L</th>
         <th>Match Diff</th>
@@ -20,6 +21,7 @@
           <td>{{ s.rank }}</td>
           <td>{{ getTeamName(s.teamId) }}</td>
           <td>{{ s.fixturesPlayed }}</td>
+          <td>{{ s.fixturesWon }}-{{ s.fixturesDrawn }}-{{ s.fixturesLost }}</td>
           <td>{{ s.points }}</td>
           <td>{{ s.matchWins }}-{{ s.matchLosses }}</td>
           <td>{{ s.matchDifferential }}</td>

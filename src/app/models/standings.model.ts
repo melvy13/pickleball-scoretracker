@@ -1,6 +1,9 @@
 export interface TeamStanding {
   teamId: string;
   fixturesPlayed: number;
+  fixturesWon: number;
+  fixturesDrawn: number;
+  fixturesLost: number;
   points: number;
   matchWins: number;
   matchLosses: number;

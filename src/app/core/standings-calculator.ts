@@ -35,12 +35,14 @@ export function calculateFixtureResult(fixture: Fixture, allMatches: Match[], al
   let teamAWins = 0;
   let teamBWins = 0;
   let validMatchCount = 0;
+  let totalValidMatches = 0;
 
   for (const match of fixtureMatches) {
     const voided = isMatchVoided(match, fixture.teamAId, fixture.teamBId, allPairs);
     if (voided) continue;
-    if (!match.completed) continue;
+    totalValidMatches++;
 
+    if (!match.completed) continue;
     validMatchCount++;
 
     if (match.scoreA === match.scoreB) continue; // shouldn't happen but guard anyway
@@ -54,7 +56,7 @@ export function calculateFixtureResult(fixture: Fixture, allMatches: Match[], al
   }
 
   let outcome: FixtureOutcome;
-  if (validMatchCount === 0) {
+  if (totalValidMatches === 0) {
     outcome = 'no-contest';
   } else if (teamAWins > teamBWins) {
     outcome = 'teamA';
@@ -69,7 +71,9 @@ export function calculateFixtureResult(fixture: Fixture, allMatches: Match[], al
     outcome,
     teamAWins,
     teamBWins,
-    validMatchCount
+    validMatchCount,
+    totalValidMatches,
+    fullyPlayed: totalValidMatches > 0 && validMatchCount === totalValidMatches
   };
 }
 
@@ -80,6 +84,9 @@ export function calculateStandings(teams: Team[], fixtures: Fixture[], allMatche
     standingsMap.set(team.id, {
       teamId: team.id,
       fixturesPlayed: 0,
+      fixturesWon: 0,
+      fixturesDrawn: 0,
+      fixturesLost: 0,
       points: 0,
       matchWins: 0,
       matchLosses: 0,
@@ -95,20 +102,30 @@ export function calculateStandings(teams: Team[], fixtures: Fixture[], allMatche
 
     const teamA = standingsMap.get(fixture.teamAId)!;
     const teamB = standingsMap.get(fixture.teamBId)!;
-    teamA.fixturesPlayed++;
-    teamB.fixturesPlayed++;
+
     teamA.matchWins += result.teamAWins;
     teamA.matchLosses += result.teamBWins;
     teamB.matchWins += result.teamBWins;
     teamB.matchLosses += result.teamAWins;
 
-    if (result.outcome === 'teamA') {
-      teamA.points += 2;
-    } else if (result.outcome === 'teamB') {
-      teamB.points += 2;
-    } else if (result.outcome === 'draw') {
-      teamA.points += 1;
-      teamB.points += 1;
+    if (result.fullyPlayed) {
+      teamA.fixturesPlayed++;
+      teamB.fixturesPlayed++;
+
+      if (result.outcome === 'teamA') {
+        teamA.points += 2;
+        teamA.fixturesWon++;
+        teamB.fixturesLost++;
+      } else if (result.outcome === 'teamB') {
+        teamB.points += 2;
+        teamB.fixturesWon++;
+        teamA.fixturesLost++;
+      } else if (result.outcome === 'draw') {
+        teamA.points += 1;
+        teamB.points += 1;
+        teamA.fixturesDrawn++;
+        teamB.fixturesDrawn++;
+      }
     }
   }
 
