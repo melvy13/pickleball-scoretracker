@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TournamentService } from '../../core/tournament.service';
 import { Match } from '../../models/match.model';
+import { isMatchVoided } from '../../core/standings-calculator';
+import { Fixture } from '../../models/fixture.model';
 
 interface ScoreDraft {
   scoreA: number | null;
@@ -71,5 +73,9 @@ export class ScoreEntryComponent {
   getTeamName(teamId: string): string {
     const team = this.tournamentService.teams().find(t => t.id === teamId);
     return team?.name ?? teamId;
+  }
+
+  isVoided(match: Match, fixture: Fixture): boolean {
+    return isMatchVoided(match, fixture.teamAId, fixture.teamBId, this.tournamentService.pairs());
   }
 }
