@@ -1,4 +1,29 @@
 <div class="container mt-4">
+  <h2>Teams</h2>
+  <table class="table table-sm table-bordered w-auto mb-4">
+    <thead class="table-dark">
+      <tr>
+        <th>Team ID</th>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (team of tournamentService.teams(); track team.id) {
+        <tr>
+          <td>{{ team.id }}</td>
+          <td>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              [ngModel]="team.name"
+              (ngModelChange)="onTeamNameChange(team.id, $event)"
+            />
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
   <h2>Pairs</h2>
   <p class="text-muted">
     Check "Voided" if a pair drops out or is injured. All their matches — past and future — will be excluded from standings.
@@ -11,7 +36,8 @@
         <th>Team</th>
         <th>Seed</th>
         <th>Type</th>
-        <th>Players</th>
+        <th>Player 1</th>
+        <th>Player 2</th>
         <th>Voided</th>
       </tr>
     </thead>
@@ -21,8 +47,32 @@
           <td>{{ pair.id }}</td>
           <td>{{ getTeamName(pair.team) }}</td>
           <td>{{ pair.seed }}</td>
-          <td>{{ pair.type }}</td>
-          <td>{{ pair.players[0] }} / {{ pair.players[1] }}</td>
+          <td>
+            <select
+              class="form-select form-select-sm"
+              [ngModel]="pair.type"
+              (ngModelChange)="onTypeChange(pair.id, $event)"
+            >
+              <option value="XD">XD</option>
+              <option value="WD">WD</option>
+            </select>
+          </td>
+          <td>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              [ngModel]="pair.players[0]"
+              (ngModelChange)="onPlayerChange(pair.id, 0, $event, pair.players)"
+            />
+          </td>
+          <td>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              [ngModel]="pair.players[1]"
+              (ngModelChange)="onPlayerChange(pair.id, 1, $event, pair.players)"
+            />
+          </td>
           <td>
             <input
               type="checkbox"
