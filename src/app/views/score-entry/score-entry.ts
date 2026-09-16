@@ -67,7 +67,8 @@ export class ScoreEntryComponent {
 
   getPairLabel(pairId: string): string {
     const pair = this.tournamentService.pairs().find(p => p.id === pairId);
-    return pair ? `${pair.id} (${pair.type})` : pairId;
+    if (!pair) return pairId;
+    return `${pair.players[0]} / ${pair.players[1]}`;
   }
 
   getTeamName(teamId: string): string {
@@ -81,5 +82,10 @@ export class ScoreEntryComponent {
 
   isHandicap(match: Match): boolean {
     return isHandicapMatch(match, this.tournamentService.pairs());
+  }
+
+  sanitizeNumericInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/\D/g, '');
   }
 }

@@ -10,13 +10,16 @@
         @for (matchId of fixture.matchIds; track matchId) {
           @if (tournamentService.matches().find(m => m.id === matchId); as match) {
             <div class="row align-items-center mb-2 border-bottom pb-2">
-              <div class="col-3">
-                Seed {{ match.seed }}: {{ getPairLabel(match.pairAId) }}
-                @if (isHandicap(match)) {
-                  <span class="badge bg-warning text-dark">Handicap</span>
-                }
+              <div class="col-1 text-muted small">
+                Seed {{ match.seed }}
               </div>
-              <div class="col-2">
+              <div class="col-3 text-end">
+                <div class="fw-bold">
+                  {{ match.pairAId }}
+                </div>
+                <div class="small text-muted">{{ getPairLabel(match.pairAId) }}</div>
+              </div>
+              <div class="col-1">
                 <input
                   type="number"
                   class="form-control"
@@ -24,10 +27,18 @@
                   [disabled]="match.locked || isVoided(match, fixture)"
                   [ngModel]="draftFor(match).scoreA"
                   (ngModelChange)="updateDraft(match.id, 'scoreA', $event)"
+                  (input)="sanitizeNumericInput($event)"
                 />
               </div>
-              <div class="col-1 text-center">vs</div>
-              <div class="col-2">
+              <div class="col-2 text-center">
+                <div class="fw-bold">
+                  vs
+                </div>
+                @if (isHandicap(match)) {
+                  <span class="badge bg-warning text-dark">Handicap</span>
+                }
+              </div>
+              <div class="col-1">
                 <input
                   type="number"
                   class="form-control"
@@ -35,10 +46,12 @@
                   [disabled]="match.locked || isVoided(match, fixture)"
                   [ngModel]="draftFor(match).scoreB"
                   (ngModelChange)="updateDraft(match.id, 'scoreB', $event)"
+                  (input)="sanitizeNumericInput($event)"
                 />
               </div>
               <div class="col-3">
-                {{ getPairLabel(match.pairBId) }}
+                <div class="fw-bold">{{ match.pairBId }}</div>
+                <div class="small text-muted">{{ getPairLabel(match.pairBId) }}</div>
               </div>
               <div class="col-1">
                 @if (!isVoided(match, fixture)) {
