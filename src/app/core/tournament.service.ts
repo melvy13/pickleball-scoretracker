@@ -41,9 +41,7 @@ export class TournamentService {
       return;
     }
 
-    const seedData = await firstValueFrom(
-      this.http.get<SeedData>('seed-data.json')
-    );
+    const seedData = await this.loadSeedData();
 
     const { fixtures, matches } = generateTournament(seedData.teams, seedData.pairs);
 
@@ -53,6 +51,14 @@ export class TournamentService {
     this.matches.set(matches);
 
     this.saveToStorage();
+  }
+
+  private async loadSeedData(): Promise<SeedData> {
+    try {
+      return await firstValueFrom(this.http.get<SeedData>('seed-data.local.json'));
+    } catch {
+      return await firstValueFrom(this.http.get<SeedData>('seed-data.json'));
+    }
   }
 
   private loadFromStorage(): TournamentState | null {
