@@ -32,5 +32,6 @@ export interface PairStanding {
 
 export interface RankedPairStanding extends PairStanding {
   rank: number;
+  matchDifferential: number;
   gamePointDifferential: number;
 }

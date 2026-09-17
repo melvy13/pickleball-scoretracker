@@ -244,11 +244,12 @@ export function calculatePairStandingsForSeed(seed: SeedLevel, allPairs: Pair[],
 export function rankPairStandings(standings: PairStanding[]): RankedPairStanding[] {
   const withDifferential = standings.map(s => ({
     ...s,
+    matchDifferential: s.matchWins - s.matchLosses,
     gamePointDifferential: s.gamePointsFor - s.gamePointsAgainst
   }));
 
   const sorted = [...withDifferential].sort((a, b) => {
-    if (b.matchWins !== a.matchWins) return b.matchWins - a.matchWins;
+    if (b.matchDifferential !== a.matchDifferential) return b.matchDifferential - a.matchDifferential;
     return b.gamePointDifferential - a.gamePointDifferential;
   });
 
@@ -261,7 +262,7 @@ export function rankPairStandings(standings: PairStanding[]): RankedPairStanding
     if (i > 0) {
       const prev = sorted[i - 1];
       const isTiedWithPrev =
-        pair.matchWins === prev.matchWins &&
+        pair.matchDifferential === prev.matchDifferential &&
         pair.gamePointDifferential === prev.gamePointDifferential;
 
       if (!isTiedWithPrev) {
