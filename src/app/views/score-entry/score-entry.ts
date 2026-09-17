@@ -22,6 +22,7 @@ export class ScoreEntryComponent {
   constructor(public tournamentService: TournamentService) {}
 
   drafts = signal<Record<string, ScoreDraft>>({});
+  pendingUnlockMatchId = signal<string | null>(null);
 
   draftFor(match: Match): ScoreDraft {
     const existing = this.drafts()[match.id];
@@ -55,6 +56,22 @@ export class ScoreEntryComponent {
 
   unlock(matchId: string): void {
     this.tournamentService.unlockMatch(matchId);
+  }
+
+  requestUnlock(matchId: string): void {
+    this.pendingUnlockMatchId.set(matchId);
+  }
+
+  cancelUnlock(): void {
+    this.pendingUnlockMatchId.set(null);
+  }
+
+  confirmUnlock(): void {
+    const matchId = this.pendingUnlockMatchId();
+    if (matchId) {
+      this.tournamentService.unlockMatch(matchId);
+    }
+    this.pendingUnlockMatchId.set(null);
   }
 
   private setDraftError(matchId: string, error: string | null): void {
