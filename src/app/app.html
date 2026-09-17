@@ -1,13 +1,33 @@
 <nav class="navbar navbar-expand navbar-dark bg-dark mb-3">
   <div class="container">
-    <a class="navbar-brand" routerLink="/standings">Pickleball Tracker</a>
+    <a class="navbar-brand" routerLink="/standings">Pickleball Scoretracker</a>
     <div class="navbar-nav me-auto">
       <a class="nav-link" routerLink="/standings" routerLinkActive="active">Standings</a>
       <a class="nav-link" routerLink="/score-entry" routerLinkActive="active">Score Entry</a>
       <a class="nav-link" routerLink="/pairs" routerLinkActive="active">Pairs</a>
     </div>
-    <button class="btn btn-outline-danger btn-sm" (click)="onReset()">Reset Tournament</button>
+    <button class="btn btn-outline-danger btn-sm" (click)="openResetModal()">Reset Tournament</button>
   </div>
 </nav>
 
 <router-outlet></router-outlet>
+
+@if (showResetModal()) {
+  <div class="modal d-block modal-backdrop-custom" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Reset Tournament</h5>
+        </div>
+        <div class="modal-body">
+          <p>This will permanently delete all scores and voided pairs, and reload from the original seed data.</p>
+          <p class="fw-bold mb-0">This cannot be undone. Are you sure?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="cancelReset()">Cancel</button>
+          <button class="btn btn-danger" (click)="confirmReset()">Reset Tournament</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

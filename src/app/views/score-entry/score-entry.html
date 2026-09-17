@@ -56,7 +56,7 @@
               <div class="col-1">
                 @if (!isVoided(match, fixture)) {
                   @if (match.locked) {
-                    <button class="btn btn-sm btn-outline-secondary" (click)="unlock(match.id)">
+                    <button class="btn btn-sm btn-outline-secondary" (click)="requestUnlock(match.id)">
                       Unlock
                     </button>
                   } @else {
@@ -79,3 +79,22 @@
     </div>
   }
 </div>
+
+@if (pendingUnlockMatchId()) {
+  <div class="modal d-block modal-backdrop-custom" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Unlock Match</h5>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">This will unlock the score for editing. Continue?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="cancelUnlock()">Cancel</button>
+          <button class="btn btn-warning" (click)="confirmUnlock()">Unlock</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
