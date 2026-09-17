@@ -27,6 +27,15 @@ export function isMatchVoided(match: Match, teamAId: string, teamBId: string, al
   return excludedForA.has(match.seed) || excludedForB.has(match.seed);
 }
 
+export function isHandicapMatch(match: Match, allPairs: Pair[]): boolean {
+  const pairA = allPairs.find(p => p.id === match.pairAId);
+  const pairB = allPairs.find(p => p.id === match.pairBId);
+
+  if (!pairA || !pairB) return false;
+
+  return pairA.type !== pairB.type;
+}
+
 export function calculateFixtureResult(fixture: Fixture, allMatches: Match[], allPairs: Pair[]): FixtureResult {
   const fixtureMatches = fixture.matchIds
     .map(id => allMatches.find(m => m.id === id))

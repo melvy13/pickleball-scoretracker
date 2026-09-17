@@ -40,7 +40,6 @@ export function generateTournament(teams: Team[], pairs: Pair[]): GeneratedTourn
         }
 
         const matchId = `${fixtureId}-seed${seed}`; // e.g. A-vs-B-seed1
-        const isHandicapMatch = pairA.type !== pairB.type;
 
         matches.push({
           id: matchId,
@@ -50,7 +49,6 @@ export function generateTournament(teams: Team[], pairs: Pair[]): GeneratedTourn
           pairBId: pairB.id,
           scoreA: null,
           scoreB: null,
-          isHandicapMatch,
           completed: false,
           locked: false
         });

@@ -1,7 +1,7 @@
 import { Injectable, signal } from "@angular/core";
 import { Fixture } from "../models/fixture.model";
 import { Match } from "../models/match.model";
-import { Pair } from "../models/pair.model";
+import { Pair, PairType } from "../models/pair.model";
 import { Team } from "../models/team.model";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
@@ -138,5 +138,26 @@ export class TournamentService {
   resetTournament(): void {
     localStorage.removeItem(STORAGE_KEY);
     window.location.reload();
+  }
+
+  updateTeamName(teamId: string, name: string): void {
+    this.teams.update(teams =>
+      teams.map(t => (t.id === teamId ? { ...t, name } : t))
+    );
+    this.saveToStorage();
+  }
+
+  updatePairPlayers(pairId: string, players: [string, string]): void {
+    this.pairs.update(pairs =>
+      pairs.map(p => (p.id === pairId ? { ...p, players } : p))
+    );
+    this.saveToStorage();
+  }
+
+  updatePairType(pairId: string, type: PairType): void {
+    this.pairs.update(pairs =>
+      pairs.map(p => (p.id === pairId ? { ...p, type } : p))
+    );
+    this.saveToStorage();
   }
 }
