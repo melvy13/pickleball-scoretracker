@@ -90,7 +90,7 @@ ng build --configuration production
 Then, on the machine that will run it:
 
 ```bash
-npx serve dist/pickleball-scoretracker/browser
+npx serve -s dist/pickleball-scoretracker/browser
 ```
 
 This works fully offline (`localhost` doesn't require a network connection) after the `serve` package has been downloaded once. To view the app from a *different* device on the same network, use the "Network" URL that `serve` prints, provided the local network allows device-to-device traffic.
