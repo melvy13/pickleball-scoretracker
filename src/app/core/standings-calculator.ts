@@ -3,7 +3,7 @@ import { Fixture } from "../models/fixture.model";
 import { Match } from "../models/match.model";
 import { Pair, SeedLevel } from "../models/pair.model";
 import { Team } from "../models/team.model";
-import { RankedStanding, TeamStanding } from "../models/standings.model";
+import { PairStanding, RankedPairStanding, RankedStanding, TeamStanding } from "../models/standings.model";
 
 export function getExcludedSeedsForTeam(teamId: string, allPairs: Pair[]): Set<SeedLevel> {
   const teamPairs = allPairs.filter(p => p.team === teamId);
@@ -192,6 +192,85 @@ export function rankStandings(standings: TeamStanding[]): RankedStanding[] {
     }
 
     ranked.push({ ...team, rank: currentRank });
+  }
+
+  return ranked;
+}
+
+export function calculatePairStandingsForSeed(seed: SeedLevel, allPairs: Pair[], allMatches: Match[]): PairStanding[] {
+  const seedPairs = allPairs.filter(p => p.seed === seed && !p.voided);
+
+  const standingsMap = new Map<string, PairStanding>();
+  for (const pair of seedPairs) {
+    standingsMap.set(pair.id, {
+      pairId: pair.id,
+      team: pair.team,
+      seed: pair.seed,
+      matchesPlayed: 0,
+      matchWins: 0,
+      matchLosses: 0,
+      gamePointsFor: 0,
+      gamePointsAgainst: 0
+    });
+  }
+
+  const seedMatches = allMatches.filter(m => m.seed === seed && m.completed);
+  for (const match of seedMatches) {
+    const pairA = standingsMap.get(match.pairAId);
+    const pairB = standingsMap.get(match.pairBId);
+
+    if (!pairA || !pairB) continue;
+    if (match.scoreA === null || match.scoreB === null) continue;
+
+    pairA.matchesPlayed++;
+    pairB.matchesPlayed++;
+    pairA.gamePointsFor += match.scoreA;
+    pairA.gamePointsAgainst += match.scoreB;
+    pairB.gamePointsFor += match.scoreB;
+    pairB.gamePointsAgainst += match.scoreA;
+
+    if (match.scoreA > match.scoreB) {
+      pairA.matchWins++;
+      pairB.matchLosses++;
+    } else {
+      pairB.matchWins++;
+      pairA.matchLosses++;
+    }
+  }
+
+  return Array.from(standingsMap.values());
+}
+
+export function rankPairStandings(standings: PairStanding[]): RankedPairStanding[] {
+  const withDifferential = standings.map(s => ({
+    ...s,
+    matchDifferential: s.matchWins - s.matchLosses,
+    gamePointDifferential: s.gamePointsFor - s.gamePointsAgainst
+  }));
+
+  const sorted = [...withDifferential].sort((a, b) => {
+    if (b.matchDifferential !== a.matchDifferential) return b.matchDifferential - a.matchDifferential;
+    return b.gamePointDifferential - a.gamePointDifferential;
+  });
+
+  const ranked: RankedPairStanding[] = [];
+  let currentRank = 1;
+
+  for (let i = 0; i < sorted.length; i++) {
+    const pair = sorted[i];
+
+    if (i > 0) {
+      const prev = sorted[i - 1];
+      const isTiedWithPrev =
+        pair.matchDifferential === prev.matchDifferential &&
+        pair.gamePointDifferential === prev.gamePointDifferential;
+
+      if (!isTiedWithPrev) {
+        currentRank = i + 1;
+      }
+    }
+
+    ranked.push({ ...pair, rank: currentRank });
   }
 
   return ranked;
