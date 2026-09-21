@@ -1,7 +1,7 @@
 <div class="container mt-4">
   <h2>Score Entry</h2>
 
-  @for (fixture of tournamentService.fixtures(); track fixture.id) {
+  @for (fixture of orderedFixtures(); track fixture.id) {
     <div class="card mb-3">
       <div class="card-header">
         {{ getTeamName(fixture.teamAId) }} vs {{ getTeamName(fixture.teamBId) }}
