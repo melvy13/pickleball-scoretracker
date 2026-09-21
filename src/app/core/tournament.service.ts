@@ -166,4 +166,18 @@ export class TournamentService {
     );
     this.saveToStorage();
   }
+
+  reorderFixtures(orderedFixtureIds: string[]): void {
+    const orderMap = new Map<string, number>();
+    orderedFixtureIds.forEach((id, index) => orderMap.set(id, index));
+
+    this.fixtures.update(fixtures =>
+      fixtures.map(fixture => ({
+        ...fixture,
+        order: orderMap.get(fixture.id) ?? fixture.order
+      }))
+    );
+
+    this.saveToStorage();
+  }
 }

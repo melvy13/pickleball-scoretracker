@@ -3,4 +3,5 @@ export interface Fixture {
   teamAId: string;
   teamBId: string;
   matchIds: [string, string, string]; // one per seed, in seed order
+  order: number;
 }
