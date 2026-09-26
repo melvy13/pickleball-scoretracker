@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TournamentService } from './core/tournament.service';
+import { SeedData, validateSeedData } from './core/seed-data-validator';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,9 @@ import { TournamentService } from './core/tournament.service';
 export class App {
   title = 'pickleball-scoretracker';
   showResetModal = signal(false);
+  showUploadModal = signal(false);
+  uploadErrors = signal<string[]>([]);
+  pendingSeedData = signal<SeedData | null>(null);
 
   constructor(private tournamentService: TournamentService) {}
 
@@ -34,5 +38,55 @@ export class App {
 
   confirmReset(): void {
     this.tournamentService.resetTournament();
+  }
+
+  openUploadModal(): void {
+    this.uploadErrors.set([]);
+    this.pendingSeedData.set(null);
+    this.showUploadModal.set(true);
+  }
+
+  cancelUpload(): void {
+    this.showUploadModal.set(false);
+    this.uploadErrors.set([]);
+    this.pendingSeedData.set(null);
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.pendingSeedData.set(null);
+
+      try {
+        const parsed = JSON.parse(reader.result as string);
+        const result = validateSeedData(parsed);
+
+        if (!result.valid) {
+          this.uploadErrors.set(result.errors);
+          return;
+        }
+
+        this.uploadErrors.set([]);
+        this.pendingSeedData.set(parsed as SeedData);
+      } catch {
+        this.uploadErrors.set(['File is not valid JSON.']);
+      }
+    };
+    reader.readAsText(file);
+
+    input.value = '';
+  }
+
+  confirmUpload(): void {
+    const data = this.pendingSeedData();
+    if (!data) return;
+
+    this.tournamentService.loadCustomSeedData(data);
+    this.showUploadModal.set(false);
+    this.pendingSeedData.set(null);
   }
 }

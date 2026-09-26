@@ -6,6 +6,7 @@ import { Team } from "../models/team.model";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { generateTournament } from "./tournament-generator";
+import { SeedData } from "./seed-data-validator";
 
 const STORAGE_KEY = 'tournament-state';
 
@@ -14,11 +15,6 @@ interface TournamentState {
   pairs: Pair[];
   fixtures: Fixture[];
   matches: Match[];
-}
-
-interface SeedData {
-  teams: Team[];
-  pairs: Pair[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -164,6 +160,17 @@ export class TournamentService {
     this.pairs.update(pairs =>
       pairs.map(p => (p.id === pairId ? { ...p, type } : p))
     );
+    this.saveToStorage();
+  }
+
+  loadCustomSeedData(data: SeedData): void {
+    const { fixtures, matches } = generateTournament(data.teams, data.pairs);
+
+    this.teams.set(data.teams);
+    this.pairs.set(data.pairs);
+    this.fixtures.set(fixtures);
+    this.matches.set(matches);
+
     this.saveToStorage();
   }
 }

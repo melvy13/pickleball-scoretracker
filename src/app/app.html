@@ -7,6 +7,7 @@
       <a class="nav-link" routerLink="/pairs" routerLinkActive="active">Pairs</a>
       <a class="nav-link" routerLink="/pair-rankings" routerLinkActive="active">Pair Rankings</a>
     </div>
+    <button class="btn btn-outline-secondary btn-sm me-2" (click)="openUploadModal()">Upload Initial Seed Data</button>
     <button class="btn btn-outline-danger btn-sm" (click)="openResetModal()">Reset Tournament</button>
   </div>
 </nav>
@@ -27,6 +28,44 @@
         <div class="modal-footer">
           <button class="btn btn-secondary" (click)="cancelReset()">Cancel</button>
           <button class="btn btn-danger" (click)="confirmReset()">Reset Tournament</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showUploadModal()) {
+  <div class="modal d-block modal-backdrop-custom" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Upload Initial Seed Data</h5>
+        </div>
+        <div class="modal-body">
+          <p>Upload a <code>seed-data.json</code> file to replace the current tournament with fresh teams and pairs.</p>
+          <p class="fw-bold">This will overwrite all current scores and progress. This cannot be undone.</p>
+          <input type="file" class="form-control" accept="application/json" (change)="onFileSelected($event)" />
+
+          @if (uploadErrors().length > 0) {
+            <div class="alert alert-danger mt-3 mb-0">
+              <p class="fw-bold mb-1">The file could not be loaded:</p>
+              <ul class="mb-0 small">
+                @for (err of uploadErrors(); track err) {
+                  <li>{{ err }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (pendingSeedData(); as data) {
+            <div class="alert alert-success mt-3 mb-0">
+              File is valid - {{ data.teams.length }} teams, {{ data.pairs.length }} pairs. Click "Apply" to continue.
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="cancelUpload()">Cancel</button>
+          <button class="btn btn-primary" [disabled]="!pendingSeedData()" (click)="confirmUpload()">Apply</button>
         </div>
       </div>
     </div>
