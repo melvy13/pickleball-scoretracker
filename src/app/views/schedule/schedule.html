@@ -14,7 +14,7 @@
     </thead>
     <tbody>
       @for (fixture of orderedFixtures(); track fixture.id; let i = $index) {
-        <tr>
+        <tr [class.row-flash]="fixture.id === recentlyMovedId()">
           <td>{{ i + 1 }}</td>
           <td>{{ getTeamName(fixture.teamAId) }} vs {{ getTeamName(fixture.teamBId) }}</td>
           <td>

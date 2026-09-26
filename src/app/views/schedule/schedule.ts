@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { TournamentService } from '../../core/tournament.service';
 
 @Component({
@@ -14,6 +14,8 @@ export class ScheduleComponent {
   orderedFixtures = computed(() =>
     [...this.tournamentService.fixtures()].sort((a, b) => a.order - b.order)
   );
+
+  recentlyMovedId = signal<string | null>(null);
 
   moveUp(fixtureId: string): void {
     this.swap(fixtureId, -1);
@@ -36,6 +38,13 @@ export class ScheduleComponent {
     [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
 
     this.tournamentService.reorderFixtures(reordered.map(f => f.id));
+    this.flashRow(fixtureId);
+  }
+
+  private flashRow(fixtureId: string): void {
+    this.recentlyMovedId.set(null);
+    setTimeout(() => this.recentlyMovedId.set(fixtureId), 0);
+    setTimeout(() => this.recentlyMovedId.set(null), 1000);
   }
 
   getTeamName(teamId: string): string {
