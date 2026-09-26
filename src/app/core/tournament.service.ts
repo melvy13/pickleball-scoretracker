@@ -6,6 +6,9 @@ import { Team } from "../models/team.model";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { generateTournament } from "./tournament-generator";
+import { PlayoffFixture } from "../models/playoff.model";
+import { isRoundRobinComplete, generatePlayoffs, advancePlayoffTeams } from "./playoff-generator";
+import { calculateStandings, rankStandings } from "./standings-calculator";
 
 const STORAGE_KEY = 'tournament-state';
 
@@ -14,6 +17,7 @@ interface TournamentState {
   pairs: Pair[];
   fixtures: Fixture[];
   matches: Match[];
+  playoffFixtures: PlayoffFixture[];
 }
 
 interface SeedData {
@@ -27,6 +31,7 @@ export class TournamentService {
   pairs = signal<Pair[]>([]);
   fixtures = signal<Fixture[]>([]);
   matches = signal<Match[]>([]);
+  playoffFixtures = signal<PlayoffFixture[]>([]);
 
   constructor(private http: HttpClient) {}
 
@@ -38,6 +43,7 @@ export class TournamentService {
       this.pairs.set(existing.pairs);
       this.fixtures.set(existing.fixtures);
       this.matches.set(existing.matches);
+      this.playoffFixtures.set(existing.playoffFixtures);
       return;
     }
 
@@ -49,6 +55,7 @@ export class TournamentService {
     this.pairs.set(seedData.pairs);
     this.fixtures.set(fixtures);
     this.matches.set(matches);
+    this.playoffFixtures.set([]);
 
     this.saveToStorage();
   }
@@ -77,7 +84,8 @@ export class TournamentService {
       teams: this.teams(),
       pairs: this.pairs(),
       fixtures: this.fixtures(),
-      matches: this.matches()
+      matches: this.matches(),
+      playoffFixtures: this.playoffFixtures()
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
@@ -109,6 +117,7 @@ export class TournamentService {
       )
     );
 
+    this.tryAdvancePlayoffs();
     this.saveToStorage();
   }
 
@@ -164,6 +173,47 @@ export class TournamentService {
     this.pairs.update(pairs =>
       pairs.map(p => (p.id === pairId ? { ...p, type } : p))
     );
+    this.saveToStorage();
+  }
+
+  canGeneratePlayoffs(): boolean {
+    return (
+      this.playoffFixtures().length === 0 &&
+      isRoundRobinComplete(this.fixtures(), this.matches(), this.pairs())
+    );
+  }
+
+  buildPlayoffs(): void {
+    if (!this.canGeneratePlayoffs()) {
+      throw new Error('Round robin is not complete, or playoffs were already generated.');
+    }
+
+    const standings = rankStandings(calculateStandings(this.teams(), this.fixtures(), this.matches(), this.pairs()));
+    const { fixtures, matches } = generatePlayoffs(standings, this.pairs());
+
+    this.playoffFixtures.set(fixtures);
+    this.matches.update(m => [...m, ...matches]);
+
+    this.saveToStorage();
+  }
+
+  private tryAdvancePlayoffs(): void {
+    const current = this.playoffFixtures();
+    if (current.length === 0) return;
+
+    const { updatedFixtures, newMatches } = advancePlayoffTeams(current, this.matches(), this.pairs());
+
+    this.playoffFixtures.set(updatedFixtures);
+    if (newMatches.length > 0) {
+      this.matches.update(m => [...m, ...newMatches]);
+    }
+  }
+
+  setPlayoffManualOverride(fixtureId: string, winnerTeamId: string): void {
+    this.playoffFixtures.update(fixtures =>
+      fixtures.map(f => (f.id === fixtureId ? { ...f, manualWinnerOverride: winnerTeamId } : f))
+    );
+    this.tryAdvancePlayoffs();
     this.saveToStorage();
   }
 }
