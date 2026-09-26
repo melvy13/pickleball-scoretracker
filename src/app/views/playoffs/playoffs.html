@@ -1,0 +1,94 @@
+<div class="container mt-4">
+  <h2>Playoffs</h2>
+
+  @if (!hasPlayoffs()) {
+    @if (canGenerate()) {
+      <button class="btn btn-primary" (click)="generate()">Generate Playoffs</button>
+    } @else {
+      <p class="text-muted">Playoffs can be generated once every round-robin fixture is fully played.</p>
+    }
+  }
+
+  @for (fixture of orderedFixtures(); track fixture.id) {
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between">
+        <span>{{ roundLabel(fixture) }}: {{ getTeamName(fixture.teamAId) }} vs {{ getTeamName(fixture.teamBId) }}</span>
+      </div>
+      <div class="card-body">
+        @if (!fixture.teamAId || !fixture.teamBId) {
+          <p class="text-muted mb-0">Waiting on earlier results.</p>
+        } @else {
+          @for (match of matchesFor(fixture); track match.id) {
+            <div class="row align-items-center mb-2 border-bottom pb-2">
+              <div class="col-1 text-muted small">Seed {{ match.seed }}</div>
+              <div class="col-3 text-end">
+                <div class="fw-bold">{{ match.pairAId }}</div>
+                <div class="small text-muted">{{ getPairLabel(match.pairAId) }}</div>
+              </div>
+              <div class="col-1">
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.bg-danger-subtle]="isVoided(match, fixture)"
+                  [disabled]="match.locked || isVoided(match, fixture)"
+                  [ngModel]="draftFor(match).scoreA"
+                  (ngModelChange)="updateDraft(match.id, 'scoreA', $event)"
+                  (input)="sanitizeNumericInput($event)"
+                />
+              </div>
+              <div class="col-2 text-center">
+                <div class="fw-bold">vs</div>
+                @if (isHandicap(match)) {
+                  <span class="badge bg-warning text-dark">Handicap</span>
+                }
+              </div>
+              <div class="col-1">
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.bg-danger-subtle]="isVoided(match, fixture)"
+                  [disabled]="match.locked || isVoided(match, fixture)"
+                  [ngModel]="draftFor(match).scoreB"
+                  (ngModelChange)="updateDraft(match.id, 'scoreB', $event)"
+                  (input)="sanitizeNumericInput($event)"
+                />
+              </div>
+              <div class="col-3">
+                <div class="fw-bold">{{ match.pairBId }}</div>
+                <div class="small text-muted">{{ getPairLabel(match.pairBId) }}</div>
+              </div>
+              <div class="col-1">
+                @if (!isVoided(match, fixture)) {
+                  @if (match.locked) {
+                    <button class="btn btn-sm btn-outline-secondary" (click)="unlock(match.id)">Unlock</button>
+                  } @else {
+                    <button class="btn btn-sm btn-primary" (click)="submitScore(match)">Save</button>
+                  }
+                }
+              </div>
+              @if (draftFor(match).error) {
+                <div class="col-12 text-danger small mt-1">{{ draftFor(match).error }}</div>
+              }
+            </div>
+          }
+
+          @if (resolution(fixture).requiresManualOverride) {
+            <div class="alert alert-warning mt-2 mb-0">
+              <p class="mb-2"><strong>Tied even after game-point differential.</strong> Select the winner manually:</p>
+              <button class="btn btn-sm btn-outline-dark me-2" (click)="setOverride(fixture.id, fixture.teamAId!)">
+                {{ getTeamName(fixture.teamAId) }}
+              </button>
+              <button class="btn btn-sm btn-outline-dark" (click)="setOverride(fixture.id, fixture.teamBId!)">
+                {{ getTeamName(fixture.teamBId) }}
+              </button>
+            </div>
+          } @else if (resolution(fixture).fullyPlayed && resolution(fixture).winnerId) {
+            <p class="mt-2 mb-0 text-success fw-bold">
+              Winner: {{ getTeamName(resolution(fixture).winnerId) }}
+            </p>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
