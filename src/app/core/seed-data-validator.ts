@@ -4,6 +4,7 @@ import { Pair, SeedLevel } from '../models/pair.model';
 export interface SeedData {
   teams: Team[];
   pairs: Pair[];
+  fixtureOrder?: string[];
 }
 
 export interface ValidationResult {
@@ -104,6 +105,34 @@ export function validateSeedData(data: unknown): ValidationResult {
     const seeds = seedsByTeam.get(teamId);
     if (!seeds || seeds.size !== 3 || !seeds.has(1) || !seeds.has(2) || !seeds.has(3)) {
       errors.push(`Team "${teamId}" must have exactly one pair at each of seed 1, 2, and 3.`);
+    }
+  }
+
+  if (obj['fixtureOrder'] !== undefined) {
+    const fixtureOrder = obj['fixtureOrder'];
+
+    if (!Array.isArray(fixtureOrder) || !fixtureOrder.every(f => typeof f === 'string')) {
+      errors.push('"fixtureOrder" must be an array of strings.');
+    } else {
+      const expectedCount = (teamIds.size * (teamIds.size - 1)) / 2; // n choose 2
+      if (fixtureOrder.length !== expectedCount) {
+        errors.push(`"fixtureOrder" has ${fixtureOrder.length} entries but expected ${expectedCount} (one per team pairing).`);
+      }
+
+      const seenPairings = new Set<string>();
+      for (const entry of fixtureOrder as string[]) {
+        const parts = entry.split('-');
+        if (parts.length !== 2 || !teamIds.has(parts[0]) || !teamIds.has(parts[1])) {
+          errors.push(`"fixtureOrder" entry "${entry}" must be "<teamId>-<teamId>" using valid team ids.`);
+          continue;
+        }
+
+        const key = [parts[0], parts[1]].sort().join('-');
+        if (seenPairings.has(key)) {
+          errors.push(`"fixtureOrder" has a duplicate or repeated pairing: "${entry}".`);
+        }
+        seenPairings.add(key);
+      }
     }
   }
 

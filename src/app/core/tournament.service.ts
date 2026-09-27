@@ -39,7 +39,7 @@ export class TournamentService {
 
     const seedData = await this.loadSeedData();
 
-    const { fixtures, matches } = generateTournament(seedData.teams, seedData.pairs);
+    const { fixtures, matches } = generateTournament(seedData.teams, seedData.pairs, seedData.fixtureOrder);
 
     this.teams.set(seedData.teams);
     this.pairs.set(seedData.pairs);
@@ -164,7 +164,7 @@ export class TournamentService {
   }
 
   loadCustomSeedData(data: SeedData): void {
-    const { fixtures, matches } = generateTournament(data.teams, data.pairs);
+    const { fixtures, matches } = generateTournament(data.teams, data.pairs, data.fixtureOrder);
 
     this.teams.set(data.teams);
     this.pairs.set(data.pairs);
