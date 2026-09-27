@@ -45,6 +45,36 @@
         <div class="modal-body">
           <p>Upload a <code>seed-data.json</code> file to replace the current tournament with fresh teams and pairs.</p>
           <p class="fw-bold">This will overwrite all current scores and progress. This cannot be undone.</p>
+
+          <details class="mb-3">
+            <summary class="text-primary" style="cursor: pointer;">What should this file look like?</summary>
+            <div class="small text-muted mt-2">
+              <p class="mb-1">
+                The file needs a <code>teams</code> array and a <code>pairs</code> array. Every team must have
+                <strong>exactly 3 pairs</strong> — one at each seed (1, 2, and 3).
+              </p>
+              <ul class="mb-2">
+                <li><code>teams[].id</code> — unique short id, e.g. <code>"A"</code></li>
+                <li><code>teams[].name</code> — display name, e.g. <code>"Thunderbolts"</code></li>
+                <li><code>pairs[].id</code> — unique pair id, e.g. <code>"A1"</code></li>
+                <li><code>pairs[].team</code> — must match a team id above, e.g. <code>"A"</code></li>
+                <li><code>pairs[].seed</code> — <code>1</code>, <code>2</code>, or <code>3</code></li>
+                <li><code>pairs[].type</code> — <code>"XD"</code> or <code>"WD"</code></li>
+                <li><code>pairs[].players</code> — array of exactly 2 names</li>
+                <li><code>pairs[].voided</code> — <code>true</code> or <code>false</code> (normally <code>false</code>)</li>
+              </ul>
+              <p class="mb-1">Optional — controls the starting match order in Score Entry:</p>
+              <ul class="mb-2">
+                <li>
+                  <code>fixtureOrder</code> — array of <code>"teamId-teamId"</code> pairings in the order you want them
+                  played, e.g. <code>["C-E", "A-F", "B-G"]</code>. Every team pairing must appear exactly once. If left
+                  out, fixtures default to a standard order.
+                </li>
+              </ul>
+              <pre class="bg-light p-2 rounded" style="white-space: pre-wrap;">{{ '{\n  "teams": [\n    { "id": "A", "name": "Team A" },\n    { "id": "B", "name": "Team B" }\n  ],\n  "pairs": [\n    { "id": "A1", "team": "A", "seed": 1, "type": "XD", "players": ["Player 1", "Player 2"], "voided": false },\n    { "id": "A2", "team": "A", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },\n    { "id": "A3", "team": "A", "seed": 3, "type": "XD", "players": ["Player 5", "Player 6"], "voided": false }\n  ],\n  "fixtureOrder": ["A-B"]\n}' }}</pre>
+            </div>
+          </details>
+
           <input type="file" class="form-control" accept="application/json" (change)="onFileSelected($event)" />
 
           @if (uploadErrors().length > 0) {
