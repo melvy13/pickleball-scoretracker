@@ -19,6 +19,7 @@ export function generateTournament(teams: Team[], pairs: Pair[]): GeneratedTourn
   }
 
   const seeds: SeedLevel[] = [1, 2, 3];
+  let fixtureOrder = 1;
 
   for (let i = 0; i < teams.length; i++) {
     for (let j = i + 1; j < teams.length; j++) {
@@ -60,8 +61,11 @@ export function generateTournament(teams: Team[], pairs: Pair[]): GeneratedTourn
         id: fixtureId,
         teamAId: teamA.id,
         teamBId: teamB.id,
-        matchIds: matchIds as [string, string, string]
+        matchIds: matchIds as [string, string, string],
+        order: fixtureOrder
       });
+
+      fixtureOrder++;
     }
   }
 

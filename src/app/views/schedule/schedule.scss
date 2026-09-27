@@ -1,0 +1,8 @@
+.row-flash > td {
+  animation: flashHighlight 1.0s ease-out;
+}
+
+@keyframes flashHighlight {
+  from { background-color: #fff3cd; }
+  to { background-color: transparent; }
+}

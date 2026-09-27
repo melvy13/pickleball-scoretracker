@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TournamentService } from '../../core/tournament.service';
 import { Match } from '../../models/match.model';
@@ -20,6 +20,10 @@ interface ScoreDraft {
 })
 export class ScoreEntryComponent {
   constructor(public tournamentService: TournamentService) {}
+
+  orderedFixtures = computed(() =>
+    [...this.tournamentService.fixtures()].sort((a, b) => a.order - b.order)
+  );
 
   drafts = signal<Record<string, ScoreDraft>>({});
   pendingUnlockMatchId = signal<string | null>(null);
