@@ -89,4 +89,8 @@ export class App {
     this.showUploadModal.set(false);
     this.pendingSeedData.set(null);
   }
+
+  viewSourceCode(): void {
+    window.open('https://github.com/melvy13/pickleball-scoretracker', '_blank');
+  }
 }
