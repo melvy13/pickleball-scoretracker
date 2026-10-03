@@ -2,7 +2,7 @@ import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TournamentService } from '../../core/tournament.service';
 import { Match } from '../../models/match.model';
-import { isHandicapMatch, isMatchVoided } from '../../core/standings-calculator';
+import { isMatchVoided } from '../../core/standings-calculator';
 import { Fixture } from '../../models/fixture.model';
 
 interface ScoreDraft {
@@ -99,10 +99,6 @@ export class ScoreEntryComponent {
 
   isVoided(match: Match, fixture: Fixture): boolean {
     return isMatchVoided(match, fixture.teamAId, fixture.teamBId, this.tournamentService.pairs());
-  }
-
-  isHandicap(match: Match): boolean {
-    return isHandicapMatch(match, this.tournamentService.pairs());
   }
 
   sanitizeNumericInput(event: Event): void {
