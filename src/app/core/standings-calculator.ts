@@ -268,36 +268,64 @@ export function calculatePairStandingsForSeed(seed: SeedLevel, allPairs: Pair[],
   return Array.from(standingsMap.values());
 }
 
-export function rankPairStandings(standings: PairStanding[]): RankedPairStanding[] {
-  const withDifferential = standings.map(s => ({
+export function rankPairStandings(
+  standings: PairStanding[],
+  allMatches: Match[]
+): RankedPairStanding[] {
+  const withDerived = standings.map(s => ({
     ...s,
-    matchDifferential: s.matchWins - s.matchLosses,
+    points: s.matchWins * 2,
     gamePointDifferential: s.gamePointsFor - s.gamePointsAgainst
   }));
 
-  const sorted = [...withDifferential].sort((a, b) => {
-    if (b.matchDifferential !== a.matchDifferential) return b.matchDifferential - a.matchDifferential;
+  const sorted = [...withDerived].sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
     return b.gamePointDifferential - a.gamePointDifferential;
   });
+
+  // group consecutive pairs that are tied on points + game point diff
+  const groups = [];
+  for (const pair of sorted) {
+    const lastGroup = groups[groups.length - 1];
+    if (
+      lastGroup &&
+      lastGroup[0].points === pair.points &&
+      lastGroup[0].gamePointDifferential === pair.gamePointDifferential
+    ) {
+      lastGroup.push(pair);
+    } else {
+      groups.push([pair]);
+    }
+  }
+
+  // within each tied group, break ties using head-to-head mini-league
+  const resolvedGroups = groups.map(group =>
+    group.length === 1 ? group : breakTieWithHeadToHead(group, allMatches)
+  );
+
+  const finalOrder = resolvedGroups.flat();
 
   const ranked: RankedPairStanding[] = [];
   let currentRank = 1;
 
-  for (let i = 0; i < sorted.length; i++) {
-    const pair = sorted[i];
+  for (let i = 0; i < finalOrder.length; i++) {
+    const pair = finalOrder[i];
 
     if (i > 0) {
-      const prev = sorted[i - 1];
-      const isTiedWithPrev =
-        pair.matchDifferential === prev.matchDifferential &&
-        pair.gamePointDifferential === prev.gamePointDifferential;
+      const prev = finalOrder[i - 1];
+      const stillTied =
+        pair.points === prev.points &&
+        pair.gamePointDifferential === prev.gamePointDifferential &&
+        (pair as any).h2hRank === (prev as any).h2hRank;
 
-      if (!isTiedWithPrev) {
+      if (!stillTied) {
         currentRank = i + 1;
       }
     }
 
-    ranked.push({ ...pair, rank: currentRank });
+    const { h2hRank, ...rest } = pair as any;
+
+    ranked.push({ ...rest, rank: currentRank });
   }
 
   return ranked;
@@ -379,6 +407,61 @@ function breakTeamTieWithHeadToHead<T extends TeamStanding>(
       const sameDiff = miniDiff(prevId) === miniDiff(curId);
       const sameGpDiff = miniGamePointDiff.get(prevId) === miniGamePointDiff.get(curId);
       if (!samePoints || !sameDiff || !sameGpDiff) {
+        rank = i + 1;
+      }
+    }
+    result.push({ ...sorted[i], h2hRank: rank });
+  }
+
+  return result;
+}
+
+function breakTieWithHeadToHead<T extends PairStanding>(
+  tiedGroup: T[],
+  allMatches: Match[]
+): (T & { h2hRank: number })[] {
+  const tiedIds = new Set(tiedGroup.map(p => p.pairId));
+
+  // Only matches played between two pairs that are both in this tied group
+  const relevantMatches = allMatches.filter(
+    m => m.completed && tiedIds.has(m.pairAId) && tiedIds.has(m.pairBId)
+  );
+
+  const miniPoints = new Map<string, number>();
+  const miniGamePointDiff = new Map<string, number>();
+  for (const pair of tiedGroup) {
+    miniPoints.set(pair.pairId, 0);
+    miniGamePointDiff.set(pair.pairId, 0);
+  }
+
+  for (const match of relevantMatches) {
+    if (match.scoreA === null || match.scoreB === null) continue;
+
+    miniGamePointDiff.set(match.pairAId, miniGamePointDiff.get(match.pairAId)! + (match.scoreA - match.scoreB));
+    miniGamePointDiff.set(match.pairBId, miniGamePointDiff.get(match.pairBId)! + (match.scoreB - match.scoreA));
+
+    if (match.scoreA > match.scoreB) {
+      miniPoints.set(match.pairAId, miniPoints.get(match.pairAId)! + 2);
+    } else {
+      miniPoints.set(match.pairBId, miniPoints.get(match.pairBId)! + 2);
+    }
+  }
+
+  const sorted = [...tiedGroup].sort((a, b) => {
+    const pointsDiff = miniPoints.get(b.pairId)! - miniPoints.get(a.pairId)!;
+    if (pointsDiff !== 0) return pointsDiff;
+    return miniGamePointDiff.get(b.pairId)! - miniGamePointDiff.get(a.pairId)!;
+  });
+
+  const result: (T & { h2hRank: number })[] = [];
+  let rank = 1;
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0) {
+      const prevPoints = miniPoints.get(sorted[i - 1].pairId)!;
+      const prevDiff = miniGamePointDiff.get(sorted[i - 1].pairId)!;
+      const curPoints = miniPoints.get(sorted[i].pairId)!;
+      const curDiff = miniGamePointDiff.get(sorted[i].pairId)!;
+      if (prevPoints !== curPoints || prevDiff !== curDiff) {
         rank = i + 1;
       }
     }

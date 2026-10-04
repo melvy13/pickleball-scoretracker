@@ -16,7 +16,8 @@ export class PairRankingsComponent {
   private seedRankings = (seed: SeedLevel) =>
     computed(() =>
       rankPairStandings(
-        calculatePairStandingsForSeed(seed, this.tournamentService.pairs(), this.tournamentService.matches())
+        calculatePairStandingsForSeed(seed, this.tournamentService.pairs(), this.tournamentService.matches()),
+        this.tournamentService.matches()
       )
     );
   
