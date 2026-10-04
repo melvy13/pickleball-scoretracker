@@ -19,7 +19,7 @@ export class StandingsComponent {
     const pairs = this.tournamentService.pairs();
 
     const raw = calculateStandings(teams, fixtures, matches, pairs);
-    return rankStandings(raw);
+    return rankStandings(raw, fixtures, matches, pairs);
   });
 
   getTeamName(teamId: string): string {
