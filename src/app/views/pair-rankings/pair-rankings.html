@@ -16,8 +16,8 @@
           <th>Team</th>
           <th>Players</th>
           <th>Played</th>
+          <th>Points</th>
           <th>Match W-L</th>
-          <th>Match Diff</th>
           <th>Game Pt W-L</th>
           <th>Game Pt Diff</th>
         </tr>
@@ -30,8 +30,8 @@
             <td>{{ getTeamName(p.team) }}</td>
             <td>{{ getPlayerNames(p.pairId) }}</td>
             <td>{{ p.matchesPlayed }}</td>
+            <td>{{ p.points }}</td>
             <td>{{ p.matchWins }}-{{ p.matchLosses }}</td>
-            <td>{{ p.matchDifferential }}</td>
             <td>{{ p.gamePointsFor }}-{{ p.gamePointsAgainst }}</td>
             <td>{{ p.gamePointDifferential }}</td>
           </tr>
