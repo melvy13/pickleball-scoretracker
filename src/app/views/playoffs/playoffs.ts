@@ -4,7 +4,7 @@ import { TournamentService } from '../../core/tournament.service';
 import { PlayoffFixture, PlayoffFixtureResolution } from '../../models/playoff.model';
 import { resolvePlayoffFixture } from '../../core/playoff-generator';
 import { Match } from '../../models/match.model';
-import { isHandicapMatch, isMatchVoided } from '../../core/standings-calculator';
+import { isMatchVoided } from '../../core/standings-calculator';
 
 interface ScoreDraft {
   scoreA: number | null;
@@ -38,7 +38,7 @@ export class PlayoffsComponent {
   );
 
   canGenerate = computed(() => this.tournamentService.canGeneratePlayoffs());
-  // hasPlayoffs = computed(() => this.tournamentService.playoffFixtures().length > 0);
+  hasPlayoffs = computed(() => this.tournamentService.playoffFixtures().length > 0);
 
   generate(): void {
     this.tournamentService.buildPlayoffs();
@@ -106,10 +106,6 @@ export class PlayoffsComponent {
   isVoided(match: Match, fixture: PlayoffFixture): boolean {
     if (!fixture.teamAId || !fixture.teamBId) return false;
     return isMatchVoided(match, fixture.teamAId, fixture.teamBId, this.tournamentService.pairs());
-  }
-
-  isHandicap(match: Match): boolean {
-    return isHandicapMatch(match, this.tournamentService.pairs());
   }
 
   getPairLabel(pairId: string): string {

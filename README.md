@@ -100,5 +100,3 @@ This works fully offline (`localhost` doesn't require a network connection) afte
 - Single-device use only — no sync between multiple browsers/devices, no concurrent-edit handling.
 - No JSON export/import backup yet.
 - A team must have exactly 3 pairs (one per seed); a team short a pair isn't natively supported (a workaround is to add a placeholder pair and immediately void it).
-
-By using this app you agree to never let a WD pair forget they start every handicap match already winning - because, as everyone knows, women always win (O_O;)

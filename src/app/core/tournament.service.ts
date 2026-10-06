@@ -39,7 +39,7 @@ export class TournamentService {
       this.pairs.set(existing.pairs);
       this.fixtures.set(existing.fixtures);
       this.matches.set(existing.matches);
-      this.playoffFixtures.set(existing.playoffFixtures);
+      this.playoffFixtures.set(existing.playoffFixtures ?? []);
       return;
     }
 
@@ -215,7 +215,9 @@ export class TournamentService {
       fixtures.map(f => (f.id === fixtureId ? { ...f, manualWinnerOverride: winnerTeamId } : f))
     );
     this.tryAdvancePlayoffs();
+    this.saveToStorage();
   }
+
   loadCustomSeedData(data: SeedData): void {
     const { fixtures, matches } = generateTournament(data.teams, data.pairs, data.fixtureOrder);
 
@@ -223,6 +225,7 @@ export class TournamentService {
     this.pairs.set(data.pairs);
     this.fixtures.set(fixtures);
     this.matches.set(matches);
+    this.playoffFixtures.set([]);
     this.saveToStorage();
   }
 
