@@ -8,7 +8,7 @@ export interface GeneratedTournament {
   matches: Match[];
 }
 
-export function generateTournament(teams: Team[], pairs: Pair[]): GeneratedTournament {
+export function generateTournament(teams: Team[], pairs: Pair[], fixtureOrder?: string[]): GeneratedTournament {
   const fixtures: Fixture[] = [];
   const matches: Match[] = [];
 
@@ -19,6 +19,17 @@ export function generateTournament(teams: Team[], pairs: Pair[]): GeneratedTourn
   }
 
   const seeds: SeedLevel[] = [1, 2, 3];
+
+  const orderLookup = new Map<string, number>();
+  if (fixtureOrder) {
+    fixtureOrder.forEach((entry, index) => {
+      const [a, b] = entry.split('-');
+      const key = [a, b].sort().join('-');
+      orderLookup.set(key, index);
+    });
+  }
+
+  let fallbackOrder = 0;
 
   for (let i = 0; i < teams.length; i++) {
     for (let j = i + 1; j < teams.length; j++) {
@@ -56,12 +67,18 @@ export function generateTournament(teams: Team[], pairs: Pair[]): GeneratedTourn
         matchIds.push(matchId);
       }
 
+      const normalizedKey = [teamA.id, teamB.id].sort().join('-');
+      const order = orderLookup.has(normalizedKey) ? orderLookup.get(normalizedKey)! : fallbackOrder;
+
       fixtures.push({
         id: fixtureId,
         teamAId: teamA.id,
         teamBId: teamB.id,
-        matchIds: matchIds as [string, string, string]
+        matchIds: matchIds as [string, string, string],
+        order
       });
+
+      fallbackOrder++;
     }
   }
 

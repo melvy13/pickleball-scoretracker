@@ -4,6 +4,7 @@ import { ScoreEntryComponent } from './views/score-entry/score-entry';
 import { PairsComponent } from './views/pairs/pairs';
 import { PairRankingsComponent } from './views/pair-rankings/pair-rankings';
 import { PlayoffsComponent } from './views/playoffs/playoffs';
+import { ScheduleComponent } from './views/schedule/schedule';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'standings', pathMatch: 'full' },
@@ -11,5 +12,6 @@ export const routes: Routes = [
   { path: 'score-entry', component: ScoreEntryComponent },
   { path: 'pairs', component: PairsComponent },
   { path: 'pair-rankings', component: PairRankingsComponent },
-  { path: 'playoffs', component: PlayoffsComponent }
+  { path: 'playoffs', component: PlayoffsComponent },
+  { path: 'schedule', component: ScheduleComponent }
 ];

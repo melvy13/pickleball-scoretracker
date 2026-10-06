@@ -41,5 +41,14 @@
     { "id": "H1", "team": "H", "seed": 1, "type": "WD", "players": ["Player 1", "Player 2"], "voided": false },
     { "id": "H2", "team": "H", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },
     { "id": "H3", "team": "H", "seed": 3, "type": "WD", "players": ["Player 5", "Player 6"], "voided": false }
+  ],
+  "fixtureOrder": [
+    "A-B", "A-C", "A-D", "A-E", "A-F", "A-G", "A-H",
+    "B-C", "B-D", "B-E", "B-F", "B-G", "B-H",
+    "C-D", "C-E", "C-F", "C-G", "C-H",
+    "D-E", "D-F", "D-G", "D-H",
+    "E-F", "E-G", "E-H",
+    "F-G", "F-H",
+    "G-H"
   ]
 }

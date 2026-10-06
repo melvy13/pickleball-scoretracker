@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand navbar-dark bg-dark mb-3">
+<nav class="navbar navbar-expand navbar-dark bg-dark mb-3 sticky-top">
   <div class="container">
     <a class="navbar-brand" routerLink="/standings">Pickleball Scoretracker</a>
     <div class="navbar-nav me-auto">
@@ -6,8 +6,11 @@
       <a class="nav-link" routerLink="/score-entry" routerLinkActive="active">Score Entry</a>
       <a class="nav-link" routerLink="/pairs" routerLinkActive="active">Pairs</a>
       <a class="nav-link" routerLink="/pair-rankings" routerLinkActive="active">Pair Rankings</a>
+      <a class="nav-link" routerLink="/schedule" routerLinkActive="active">Schedule</a>
       <a class="nav-link" routerLink="/playoffs" routerLinkActive="active">Playoffs</a>
     </div>
+    <button class="btn btn-outline-secondary btn-sm me-2" (click)="viewSourceCode()">View source code (Github)</button>
+    <button class="btn btn-outline-primary btn-sm me-2" (click)="openUploadModal()">Upload Initial Seed Data</button>
     <button class="btn btn-outline-danger btn-sm" (click)="openResetModal()">Reset Tournament</button>
   </div>
 </nav>
@@ -28,6 +31,74 @@
         <div class="modal-footer">
           <button class="btn btn-secondary" (click)="cancelReset()">Cancel</button>
           <button class="btn btn-danger" (click)="confirmReset()">Reset Tournament</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showUploadModal()) {
+  <div class="modal d-block modal-backdrop-custom" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Upload Initial Seed Data</h5>
+        </div>
+        <div class="modal-body">
+          <p>Upload a <code>seed-data.json</code> file to replace the current tournament with fresh teams and pairs.</p>
+          <p class="fw-bold">This will overwrite all current scores and progress. This cannot be undone.</p>
+
+          <details class="mb-3">
+            <summary class="text-primary" style="cursor: pointer;">What should this file look like?</summary>
+            <div class="small text-muted mt-2">
+              <p class="mb-1">
+                The file needs a <code>teams</code> array and a <code>pairs</code> array. Every team must have
+                <strong>exactly 3 pairs</strong> — one at each seed (1, 2, and 3).
+              </p>
+              <ul class="mb-2">
+                <li><code>teams[].id</code> — unique short id, e.g. <code>"A"</code></li>
+                <li><code>teams[].name</code> — display name, e.g. <code>"Thunderbolts"</code></li>
+                <li><code>pairs[].id</code> — unique pair id, e.g. <code>"A1"</code></li>
+                <li><code>pairs[].team</code> — must match a team id above, e.g. <code>"A"</code></li>
+                <li><code>pairs[].seed</code> — <code>1</code>, <code>2</code>, or <code>3</code></li>
+                <li><code>pairs[].type</code> — <code>"XD"</code> or <code>"WD"</code></li>
+                <li><code>pairs[].players</code> — array of exactly 2 names</li>
+                <li><code>pairs[].voided</code> — <code>true</code> or <code>false</code> (normally <code>false</code>)</li>
+              </ul>
+              <p class="mb-1">Optional — controls the starting match order in Score Entry:</p>
+              <ul class="mb-2">
+                <li>
+                  <code>fixtureOrder</code> — array of <code>"teamId-teamId"</code> pairings in the order you want them
+                  played, e.g. <code>["C-E", "A-F", "B-G"]</code>. Every team pairing must appear exactly once. If left
+                  out, fixtures default to a standard order.
+                </li>
+              </ul>
+              <pre class="bg-light p-2 rounded" style="white-space: pre-wrap;">{{ '{\n  "teams": [\n    { "id": "A", "name": "Team A" },\n    { "id": "B", "name": "Team B" }\n  ],\n  "pairs": [\n    { "id": "A1", "team": "A", "seed": 1, "type": "XD", "players": ["Player 1", "Player 2"], "voided": false },\n    { "id": "A2", "team": "A", "seed": 2, "type": "WD", "players": ["Player 3", "Player 4"], "voided": false },\n    { "id": "A3", "team": "A", "seed": 3, "type": "XD", "players": ["Player 5", "Player 6"], "voided": false }\n  ],\n  "fixtureOrder": ["A-B"]\n}' }}</pre>
+            </div>
+          </details>
+
+          <input type="file" class="form-control" accept="application/json" (change)="onFileSelected($event)" />
+
+          @if (uploadErrors().length > 0) {
+            <div class="alert alert-danger mt-3 mb-0">
+              <p class="fw-bold mb-1">The file could not be loaded:</p>
+              <ul class="mb-0 small">
+                @for (err of uploadErrors(); track err) {
+                  <li>{{ err }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (pendingSeedData(); as data) {
+            <div class="alert alert-success mt-3 mb-0">
+              File is valid - {{ data.teams.length }} teams, {{ data.pairs.length }} pairs. Click "Apply" to continue.
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="cancelUpload()">Cancel</button>
+          <button class="btn btn-primary" [disabled]="!pendingSeedData()" (click)="confirmUpload()">Apply</button>
         </div>
       </div>
     </div>

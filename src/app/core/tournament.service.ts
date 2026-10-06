@@ -9,6 +9,7 @@ import { generateTournament } from "./tournament-generator";
 import { PlayoffFixture } from "../models/playoff.model";
 import { isRoundRobinComplete, generatePlayoffs, advancePlayoffTeams } from "./playoff-generator";
 import { calculateStandings, rankStandings } from "./standings-calculator";
+import { SeedData } from "./seed-data-validator";
 
 const STORAGE_KEY = 'tournament-state';
 
@@ -18,11 +19,6 @@ interface TournamentState {
   fixtures: Fixture[];
   matches: Match[];
   playoffFixtures: PlayoffFixture[];
-}
-
-interface SeedData {
-  teams: Team[];
-  pairs: Pair[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -49,7 +45,7 @@ export class TournamentService {
 
     const seedData = await this.loadSeedData();
 
-    const { fixtures, matches } = generateTournament(seedData.teams, seedData.pairs);
+    const { fixtures, matches } = generateTournament(seedData.teams, seedData.pairs, seedData.fixtureOrder);
 
     this.teams.set(seedData.teams);
     this.pairs.set(seedData.pairs);
@@ -188,7 +184,12 @@ export class TournamentService {
       throw new Error('Round robin is not complete, or playoffs were already generated.');
     }
 
-    const standings = rankStandings(calculateStandings(this.teams(), this.fixtures(), this.matches(), this.pairs()));
+    const standings = rankStandings(
+      calculateStandings(this.teams(), this.fixtures(), this.matches(), this.pairs()),
+      this.fixtures(),
+      this.matches(),
+      this.pairs()
+    );
     const { fixtures, matches } = generatePlayoffs(standings, this.pairs());
 
     this.playoffFixtures.set(fixtures);
@@ -214,6 +215,28 @@ export class TournamentService {
       fixtures.map(f => (f.id === fixtureId ? { ...f, manualWinnerOverride: winnerTeamId } : f))
     );
     this.tryAdvancePlayoffs();
+  }
+  loadCustomSeedData(data: SeedData): void {
+    const { fixtures, matches } = generateTournament(data.teams, data.pairs, data.fixtureOrder);
+
+    this.teams.set(data.teams);
+    this.pairs.set(data.pairs);
+    this.fixtures.set(fixtures);
+    this.matches.set(matches);
+    this.saveToStorage();
+  }
+
+  reorderFixtures(orderedFixtureIds: string[]): void {
+    const orderMap = new Map<string, number>();
+    orderedFixtureIds.forEach((id, index) => orderMap.set(id, index));
+
+    this.fixtures.update(fixtures =>
+      fixtures.map(fixture => ({
+        ...fixture,
+        order: orderMap.get(fixture.id) ?? fixture.order
+      }))
+    );
+
     this.saveToStorage();
   }
 }
