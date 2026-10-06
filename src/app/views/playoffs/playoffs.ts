@@ -38,7 +38,7 @@ export class PlayoffsComponent {
   );
 
   canGenerate = computed(() => this.tournamentService.canGeneratePlayoffs());
-  hasPlayoffs = computed(() => this.tournamentService.playoffFixtures().length > 0);
+  // hasPlayoffs = computed(() => this.tournamentService.playoffFixtures().length > 0);
 
   generate(): void {
     this.tournamentService.buildPlayoffs();

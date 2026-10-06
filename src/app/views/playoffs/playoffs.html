@@ -1,12 +1,10 @@
 <div class="container mt-4">
   <h2>Playoffs</h2>
 
-  @if (!hasPlayoffs()) {
-    @if (canGenerate()) {
-      <button class="btn btn-primary" (click)="generate()">Generate Playoffs</button>
-    } @else {
-      <p class="text-muted">Playoffs can be generated once every round-robin fixture is fully played.</p>
-    }
+  @if (canGenerate()) {
+    <button class="btn btn-primary" (click)="generate()">Generate Playoffs</button>
+  } @else {
+    <p class="text-muted">Playoffs can be generated once every round-robin fixture is fully played.</p>
   }
 
   @for (fixture of orderedFixtures(); track fixture.id) {
